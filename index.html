@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ATM Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="atm">
+  <h2>ATM Login</h2>
+  <div id="login-section">
+    <input type="text" id="username" placeholder="Enter username">
+    <input type="password" id="pin" placeholder="Enter PIN">
+    <button onclick="login()">Login</button>
+    <div class="message" id="login-msg"></div>
+  </div>
+
+  <div id="atm-section" class="hidden">
+    <h2 id="welcome"></h2>
+    <select id="action">
+      <option value="balance">Check Balance</option>
+      <option value="deposit">Deposit</option>
+      <option value="withdraw">Withdraw</option>
+      <option value="history">Transaction History</option>
+    </select>
+    <input type="number" id="amount" placeholder="Enter amount (if needed)">
+    <button onclick="performAction()">Submit</button>
+    <div class="message" id="result-msg"></div>
+    <div class="transaction-history" id="history-log"></div>
+    <button onclick="logout()" class="logout">Logout</button>
+  </div>
+</div>
+
+<script>
+  const accounts = {
+    user1: { pin: 1111, balance: 5000, transactions: [] },
+    user2: { pin: 2222, balance: 8000, transactions: [] }
+  };
+
+  let currentUser = null;
+
+  function login() {
+    const username = document.getElementById('username').value.trim();
+    const pin = parseInt(document.getElementById('pin').value);
+
+    if (accounts[username] && accounts[username].pin === pin) {
+      currentUser = username;
+      document.getElementById('login-section').classList.add('hidden');
+      document.getElementById('atm-section').classList.remove('hidden');
+      document.getElementById('welcome').innerText = `Welcome, ${username}`;
+      document.getElementById('result-msg').innerText = '';
+    } else {
+      document.getElementById('login-msg').innerText = 'Invalid username or PIN.';
+    }
+  }
+
+  function performAction() {
+    const action = document.getElementById('action').value;
+    const amount = parseInt(document.getElementById('amount').value);
+    const account = accounts[currentUser];
+    let msg = "";
+
+    if (action === "balance") {
+      msg = `Current Balance: Rs. ${account.balance}`;
+    } else if (action === "deposit") {
+      if (amount > 0) {
+        account.balance += amount;
+        account.transactions.push(`Deposited: Rs. ${amount}`);
+        msg = "Deposit successful!";
+      } else {
+        msg = "Invalid deposit amount.";
+      }
+    } else if (action === "withdraw") {
+      if (amount > 0 && amount <= account.balance) {
+        account.balance -= amount;
+        account.transactions.push(`Withdrew: Rs. ${amount}`);
+        msg = "Withdrawal successful!";
+      } else {
+        msg = "Invalid or insufficient funds.";
+      }
+    } else if (action === "history") {
+      if (account.transactions.length === 0) {
+        msg = "No transactions yet.";
+      } else {
+        msg = "Transaction History:";
+      }
+      document.getElementById('history-log').innerHTML = account.transactions.map(t => `<div>- ${t}</div>`).join('');
+    }
+
+    if (action !== 'history') {
+      document.getElementById('history-log').innerHTML = '';
+    }
+
+    document.getElementById('result-msg').innerText = msg;
+    document.getElementById('amount').value = '';
+  }
+
+  function logout() {
+    currentUser = null;
+    document.getElementById('login-section').classList.remove('hidden');
+    document.getElementById('atm-section').classList.add('hidden');
+    document.getElementById('username').value = '';
+    document.getElementById('pin').value = '';
+    document.getElementById('login-msg').innerText = '';
+  }
+</script>
+
+</body>
+</html>
